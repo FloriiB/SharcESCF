@@ -287,20 +287,20 @@ class QMoutput():
 
     def writeQMout(self): #Write QM.out file
         
-        matrix_dimention = self.QMInput.number_of_singlets + 3*self.QMInput.number_of_triplets + 1
+        matrix_dimension = self.QMInput.number_of_singlets + 3*self.QMInput.number_of_triplets + 1
         #print hamilton
         string = ''
-        string += '! %i Hamiltonian Matrix (%ix%i, complex)\n' %(1, matrix_dimention, matrix_dimention)
-        string += '%i %i\n' % (matrix_dimention, matrix_dimention)
+        string += '! %i Hamiltonian Matrix (%ix%i, complex)\n' %(1, matrix_dimension, matrix_dimension)
+        string += '%i %i\n' % (matrix_dimension, matrix_dimension)
         for i in self.hamiltonian:
             for j in i:
                 string += '%s ' %(eformat(j, 12, 3))
             string += '\n'
         string += '\n'
         #print dipole matrix
-        string += '! %i Dipole Moment Matrices (3x%ix%i, complex)\n' % (2, matrix_dimention, matrix_dimention)
+        string += '! %i Dipole Moment Matrices (3x%ix%i, complex)\n' % (2, matrix_dimension, matrix_dimension)
         for i in self.all_diplote_matrices:
-            string += '%i %i\n' % (matrix_dimention, matrix_dimention)
+            string += '%i %i\n' % (matrix_dimension, matrix_dimension)
             for j in i:
                 for k in j:
                     string += '%s ' %(eformat(k, 12, 3))
