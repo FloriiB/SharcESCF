@@ -287,20 +287,20 @@ class QMoutput():
 
     def writeQMout(self): #Write QM.out file
         
-        matrix_dimension = self.QMInput.number_of_singlets + 3*self.QMInput.number_of_triplets + 1
+        matrix_dimention = self.QMInput.number_of_singlets + 3*self.QMInput.number_of_triplets + 1
         #print hamilton
         string = ''
-        string += '! %i Hamiltonian Matrix (%ix%i, complex)\n' %(1, matrix_dimension, matrix_dimension)
-        string += '%i %i\n' % (matrix_dimension, matrix_dimension)
+        string += '! %i Hamiltonian Matrix (%ix%i, complex)\n' %(1, matrix_dimention, matrix_dimention)
+        string += '%i %i\n' % (matrix_dimention, matrix_dimention)
         for i in self.hamiltonian:
             for j in i:
                 string += '%s ' %(eformat(j, 12, 3))
             string += '\n'
         string += '\n'
         #print dipole matrix
-        string += '! %i Dipole Moment Matrices (3x%ix%i, complex)\n' % (2, matrix_dimension, matrix_dimension)
+        string += '! %i Dipole Moment Matrices (3x%ix%i, complex)\n' % (2, matrix_dimention, matrix_dimention)
         for i in self.all_diplote_matrices:
-            string += '%i %i\n' % (matrix_dimension, matrix_dimension)
+            string += '%i %i\n' % (matrix_dimention, matrix_dimention)
             for j in i:
                 for k in j:
                     string += '%s ' %(eformat(k, 12, 3))
@@ -437,8 +437,8 @@ class QMoutput():
         string += 'a_mo_read=2\n'
         string += 'b_mo=mos.DSPL\n'
         string += 'b_mo_read=2\n'
-        string += 'a_det=det.DSPL_000_eq.truncated\n'
-        string += 'b_det=det.DSPL.truncated\n'
+        string += 'a_det=det.DSPL_000_eq\n'
+        string += 'b_det=det.DSPL\n'
         string += 'mix_aoovl=AOovl\n'
         if self.QMInput.frozen_core:
             string += 'ncore=' + str(self.QMInput.ncore) + '\n'
@@ -456,8 +456,8 @@ class QMoutput():
             string += 'a_mo_read=2\n'
             string += 'b_mo=mos.DSPL\n'
             string += 'b_mo_read=2\n'
-            string += 'a_det=det.DSPL_000_eq.trip.truncated\n'
-            string += 'b_det=det.DSPL.trip.truncated\n'
+            string += 'a_det=det.DSPL_000_eq.trip\n'
+            string += 'b_det=det.DSPL.trip\n'
             string += 'mix_aoovl=AOovl\n'
             if self.QMInput.frozen_core:
                 string += 'ncore=' + str(self.QMInput.ncore) + '\n'
@@ -507,6 +507,12 @@ class QMoutput():
                             continue
         # Now write new det file with only the relevant lines    
         which_dets_to_keep = sorted(list(set(which_dets_to_keep)))    
+        
+        for item_index, det_index in enumerate(copy.deepcopy(which_dets_to_keep)):
+            det_string = list(det[det_index].split()[0])
+            if 'a' in det_string[0:int(self.QMInput.ncore)] or 'b' in det_string[0:int(self.QMInput.ncore)]:
+                which_dets_to_keep.remove(det_index)
+                
         nbr_of_dets = len(which_dets_to_keep)
         
         det_truncated = ''
@@ -826,7 +832,7 @@ class QM(): #Q.in Class. -> read all input data and prepare turbomole calculatio
                 self.turbodir = line.split()[-1]
             if 'scratchdir' in line:
                 # enables this for slurm jobs !!
-                # self.scratchdir = line.split()[-1] + '/' +str(os.environ['USER']) + '-' + str(os.environ['SLURM_JOB_ID']) 
+                #self.scratchdir = line.split()[-1] + '/' +str(os.environ['USER']) + '-' + str(os.environ['SLURM_JOB_ID']) 
                 self.scratchdir = line.split()[-1]
             if 'memory' in line:
                 self.memory = line.split()[-1]     
@@ -1195,6 +1201,7 @@ def mkdir(DIR):
 def runProgram(string, workdir, outfile, errfile=''):
     prevdir = os.getcwd()
     os.chdir(workdir)
+
     try:
         with open(os.path.join(workdir, outfile), 'w') as stdoutfile:
             if errfile:
@@ -1824,7 +1831,7 @@ def main():
         print('Usage:\n./ESCF.py <QMin>\n')
         sys.exit()
     QMinfilename = sys.argv[1]
-    
+
     print_header()
     
     QMinfilename = readfile(QMinfilename)
